@@ -12,12 +12,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 import java.util.Map;
+import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -27,6 +29,7 @@ public class ElasticSearchEventHandlerTest {
     public static final String INDEX = "test-index";
     public static final String LABEL = "Label";
     private ElasticSearchEventHandler handler;
+    private ElasticSearchIndexSettings indexSettings;
     private GraphDatabaseService db;
     private JestClient client;
 
@@ -39,10 +42,13 @@ public class ElasticSearchEventHandlerTest {
                 .build());
         client = factory.getObject();
         db = new TestGraphDatabaseFactory().newImpermanentDatabase();
-
-        handler = new ElasticSearchEventHandler(client, ElasticSearchIndexSpecParser.parseIndexSpec(INDEX + ":" + LABEL + "(foo)"), db);
-        // don't use async Jest for testing
-        handler.setUseAsyncJest(false);
+        
+        Map<Label, List<ElasticSearchIndexSpec>> indexSpec;
+        indexSpec = ElasticSearchIndexSpecParser.parseIndexSpec(INDEX + ":" + LABEL + "(foo)");
+        indexSettings = new ElasticSearchIndexSettings(indexSpec, true, true);
+        
+        handler = new ElasticSearchEventHandler(client, indexSettings, db);
+        handler.setUseAsyncJest(false); // don't use async Jest for testing
         db.registerTransactionEventHandler(handler);
         
        // create index
