@@ -58,7 +58,6 @@ public class ElasticSearchEventHandlerTest {
        client.execute(new CreateIndex.Builder(INDEX).build());
        
        node = createNode();
-       id = String.valueOf(node.getId());
     }
 
     @After
@@ -72,17 +71,18 @@ public class ElasticSearchEventHandlerTest {
     private Node createNode() {
         Transaction tx = db.beginTx();
         Node node = db.createNode(DynamicLabel.label(LABEL));
-        node.setProperty("foo","bar");
+        node.setProperty("foo", "bar");
         tx.success();tx.close();
+        id = String.valueOf(node.getId());
         return node;
     }
     
     private void assertIndexCreation(JestResult response) throws java.io.IOException {
         client.execute(new Get.Builder(INDEX, id).build());
-        assertEquals(true,response.isSucceeded());
-        assertEquals(INDEX,response.getValue("_index"));
-        assertEquals(id,response.getValue("_id"));
-        assertEquals(LABEL,response.getValue("_type"));
+        assertEquals(true, response.isSucceeded());
+        assertEquals(INDEX, response.getValue("_index"));
+        assertEquals(id, response.getValue("_id"));
+        assertEquals(LABEL, response.getValue("_type"));
     }
     
     @Test
@@ -92,6 +92,38 @@ public class ElasticSearchEventHandlerTest {
 
         Map source = response.getSourceAsObject(Map.class);
         assertEquals(asList(LABEL), source.get("labels"));
+        assertEquals(id, source.get("id"));
+        assertEquals("bar", source.get("foo"));
+    }
+    
+    @Test
+    public void testAfterCommitWithoutID() throws Exception {
+        client.execute(new DeleteIndex.Builder(INDEX).build());
+        indexSettings.setIncludeIDField(false);
+        JestResult response = client.execute(new CreateIndex.Builder(INDEX).build());
+        node = createNode();
+        
+        response = client.execute(new Get.Builder(INDEX, id).build());
+        assertIndexCreation(response);
+
+        Map source = response.getSourceAsObject(Map.class);
+        assertEquals(asList(LABEL), source.get("labels"));
+        assertEquals(null, source.get("id"));
+        assertEquals("bar", source.get("foo"));
+    }
+    
+    @Test
+    public void testAfterCommitWithoutLabels() throws Exception {
+        client.execute(new DeleteIndex.Builder(INDEX).build());
+        indexSettings.setIncludeLabelsField(false);
+        JestResult response = client.execute(new CreateIndex.Builder(INDEX).build());
+        node = createNode();
+        
+        response = client.execute(new Get.Builder(INDEX, id).build());
+        assertIndexCreation(response);
+
+        Map source = response.getSourceAsObject(Map.class);
+        assertEquals(null, source.get("labels"));
         assertEquals(id, source.get("id"));
         assertEquals("bar", source.get("foo"));
     }
@@ -108,7 +140,6 @@ public class ElasticSearchEventHandlerTest {
         tx.success();tx.close();
 
         response = client.execute(new Get.Builder(INDEX, id).type(LABEL).build());
-        System.out.println(response.getJsonString());
         assertEquals(false, response.getValue("found"));
     }
 

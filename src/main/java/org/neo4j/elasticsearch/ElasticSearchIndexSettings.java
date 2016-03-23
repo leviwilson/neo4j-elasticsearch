@@ -21,7 +21,13 @@ public class ElasticSearchIndexSettings {
     public boolean getIncludeIDField() {
     	return includeIDField;
     }
+    public void setIncludeIDField(boolean value) {
+        includeIDField = value;
+    }
     public boolean getIncludeLabelsField() {
     	return includeLabelsField;
+    }
+    public void setIncludeLabelsField(boolean value) {
+        includeLabelsField = value;
     }
 }
