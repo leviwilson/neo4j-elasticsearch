@@ -36,18 +36,18 @@ public class ElasticSearchExtension implements Lifecycle {
 
     public ElasticSearchExtension(GraphDatabaseService gds, String hostName, String indexSpec) {
         Map iSpec;
-		try {
-			iSpec = ElasticSearchIndexSpecParser.parseIndexSpec(indexSpec);
-			if (iSpec.size() == 0) {
-				logger.severe("ElasticSearch Integration: syntax error in index_spec");
-				enabled = false;
-			}
-			this.indexSpec = iSpec;
-		} catch (ParseException e) {
+        try {
+            iSpec = ElasticSearchIndexSpecParser.parseIndexSpec(indexSpec);
+            if (iSpec.size() == 0) {
+                logger.severe("ElasticSearch Integration: syntax error in index_spec");
+                enabled = false;
+            }
+            this.indexSpec = iSpec;
+        } catch (ParseException e) {
             logger.severe("ElasticSearch Integration: Can't define index twice");
             enabled = false;
-		}
-		logger.info("Elasticsearch Integration: Running " + hostName + " - " + indexSpec);
+        }
+        logger.info("Elasticsearch Integration: Running " + hostName + " - " + indexSpec);
         this.gds = gds;
         this.hostName = hostName;
     }
