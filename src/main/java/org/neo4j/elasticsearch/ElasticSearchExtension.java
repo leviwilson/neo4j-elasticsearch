@@ -56,15 +56,18 @@ public class ElasticSearchExtension implements Lifecycle {
     public void init() throws Throwable {
         if (!enabled) return;
 
+        // trust ALL certificates
+        // INSECURE, REPLACE!!!!
         SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
-            @java.lang.Override
             public boolean isTrusted(java.security.cert.X509Certificate[] x509Certificates, java.lang.String s) throws CertificateException {
-                return false;
+                return true;
             }
         }).build();
 
         // skip hostname checks
+        // INSECURE, REPLACE!!!!
         HostnameVerifier hostnameVerifier = NoopHostnameVerifier.INSTANCE;
+
         SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
         SchemeIOSessionStrategy httpsIOSessionStrategy = new SSLIOSessionStrategy(sslContext, hostnameVerifier);
 
