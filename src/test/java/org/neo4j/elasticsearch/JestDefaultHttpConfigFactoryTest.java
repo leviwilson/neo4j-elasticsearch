@@ -8,12 +8,12 @@ import java.util.concurrent.TimeUnit;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-public class ElasticSearchJestClientFactoryTest {
+public class JestDefaultHttpConfigFactoryTest {
   private static HttpClientConfig subject;
 
   @Before
   public void beforeEach() throws Throwable {
-    subject = ElasticSearchJestClientFactory.getConfigFor("http://localhost:9200");
+    subject = JestDefaultHttpConfigFactory.getConfigFor("http://localhost:9200");
   }
 
   @Test
@@ -50,7 +50,7 @@ public class ElasticSearchJestClientFactoryTest {
 
   @Test
   public void itCanSSL() throws Throwable {
-    subject = ElasticSearchJestClientFactory.getConfigFor("https://localhost:9200");
+    subject = JestDefaultHttpConfigFactory.getConfigFor("https://localhost:9200");
 
     assertEquals("https://", subject.getDefaultSchemeForDiscoveredNodes());
   }

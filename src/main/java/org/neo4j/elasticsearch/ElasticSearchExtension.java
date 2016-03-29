@@ -1,6 +1,7 @@
 package org.neo4j.elasticsearch;
 
 import io.searchbox.client.JestClient;
+import io.searchbox.client.JestClientFactory;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.lifecycle.Lifecycle;
@@ -44,7 +45,7 @@ public class ElasticSearchExtension implements Lifecycle {
     public void init() throws Throwable {
         if (!enabled) return;
 
-        client = ElasticSearchJestClientFactory.getInstance(hostName);
+        client = getJestClient(hostName);
         handler = new ElasticSearchEventHandler(client,indexSpec,gds);
         gds.registerTransactionEventHandler(handler);
         logger.info("Connecting to ElasticSearch");
@@ -56,7 +57,6 @@ public class ElasticSearchExtension implements Lifecycle {
 
     @Override
     public void stop() throws Throwable {
-
     }
 
     @Override
@@ -67,4 +67,9 @@ public class ElasticSearchExtension implements Lifecycle {
         logger.info("Disconnected from ElasticSearch");
     }
 
+    private JestClient getJestClient(final String hostName) throws Throwable {
+      JestClientFactory factory = new JestClientFactory();
+      factory.setHttpClientConfig(JestDefaultHttpConfigFactory.getConfigFor(hostName));
+      return factory.getObject();
+    }
 }
